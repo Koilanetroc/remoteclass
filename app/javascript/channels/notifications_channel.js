@@ -1,6 +1,8 @@
 import consumer from "./consumer"
 
-consumer.subscriptions.create("NotificationsChannel", {
+let user_password = window.location.search.substr(1).split('=')[1];
+
+consumer.subscriptions.create({channel: "NotificationsChannel", password: user_password}, {
   connected() {
     // Called when the subscription is ready for use on the server
   },
