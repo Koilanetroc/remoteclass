@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PupilChannel < ApplicationCable::Channel
   def subscribed
     puts "PARAMS=#{params}"

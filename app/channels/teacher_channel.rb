@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TeacherChannel < ApplicationCable::Channel
   def subscribed
     reject && (return) unless params["name"] == ENV["TEACHER_NAME"]
@@ -9,8 +11,7 @@ class TeacherChannel < ApplicationCable::Channel
   end
 
   def send_message_to_pupils(data)
-    ActionCable.server.broadcast "pupils_channel", {
-      message: data['message']
-    }
+    ActionCable.server.broadcast "pupils_channel",
+      message: data["message"]
   end
 end
