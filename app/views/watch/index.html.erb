@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="/videojs/video-js.css">
+<link rel="stylesheet" href="/css/view.css">
+<script src="/videojs/video.js"></script>
+
+<video id="player" class="video-js video-player" controls autoplay preload="auto">
+  <p class="vjs-no-js">
+    To view this video please enable JavaScript, and consider upgrading to a web browser that
+    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+  </p>
+</video>
+
+<style>
+  html, body {
+    position: fixed;
+  }
+</style>
+
+<script>
+  var player = videojs('player');
+
+  var stream = "http://" + location.hostname + ":8085/hls/live.m3u8";
+
+  player.src({
+    src: stream,
+    type: 'application/x-mpegURL',
+    overrideNative: true
+  });
+</script>
