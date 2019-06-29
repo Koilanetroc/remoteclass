@@ -10,3 +10,7 @@ services:
     ports:
       - 1935:1935
       - 8085:8080
+  redis:
+    image: redis:5-alpine
+    ports:
+      - 6379:6379
