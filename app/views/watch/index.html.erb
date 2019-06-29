@@ -58,4 +58,36 @@
       }, 5000)
     }
   });
+
+  var App = {};
+  App.cable = ActionCable.createConsumer(`ws://${window.location.hostname}:3000/cable`);
+
+  let user_name = window.location.search.substr(1).split('=')[1];
+
+  // trying to connect as a teacher
+  const teacherChannel = App.cable.subscriptions.create({channel: 'TeacherChannel', name: user_name}, {
+    received: function(data) {
+      console.log(data);
+    },
+    connected: function () {
+      console.log("connected as a teacher")
+      this.perform('send_message_to_pupils', { message: 'Your teacher have just connected!' });
+    },
+    sendMessage: function(messageBody) {
+      console.log('wtf is this');
+    }
+  })
+
+  // trying to connect as a pupil
+  App.messaging = App.cable.subscriptions.create({channel: 'PupilChannel', name: user_name}, {
+    received: function(data) {
+      console.log(data);
+    },
+    connected: function () {
+      console.log("connected as a pupil")
+    },
+    sendMessage: function(messageBody) {
+
+    }
+  })
 </script>
