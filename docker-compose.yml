@@ -6,7 +6,7 @@ services:
     ports:
       - 5432:5432
   streamer:
-    image: alfg/nginx-rtmp
+    image: jasonrivers/nginx-rtmp
     ports:
       - 1935:1935
-      - 8085:80
+      - 8085:8080
