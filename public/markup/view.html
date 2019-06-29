@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>remoteclass</title>
+    <link rel="stylesheet" href="/videojs/video-js.css">
+    <link rel="stylesheet" href="/css/view.css">
+    <script src="/videojs/video.js"></script>
+</head>
+<body style="padding: 0; margin: 0;">
+  <video id="player" class="video-js video-player" controls autoplay preload="auto">
+    <p class="vjs-no-js">
+      To view this video please enable JavaScript, and consider upgrading to a web browser that
+      <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+    </p>
+  </video>
+
+  <script>
+    var player = videojs('player');
+
+    var stream = "http://" + location.hostname + ":8085/hls/live.m3u8";
+
+    player.src({
+      src: stream,
+      type: 'application/x-mpegURL',
+      overrideNative: true
+    });
+  </script>
+</body>
+</html>
