@@ -6,7 +6,11 @@ services:
     ports:
       - 5432:5432
   streamer:
-    image: jasonrivers/nginx-rtmp
+    build:
+      context: ./streamer
+      dockerfile: Dockerfile
+    volumes:
+      - ./streamer/run.sh:/run.sh
     ports:
       - 1935:1935
       - 8085:8080
