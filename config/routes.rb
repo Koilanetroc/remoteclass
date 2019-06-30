@@ -5,9 +5,11 @@ Rails.application.routes.draw do
 
   root to: "index#index"
 
-  get "page/index"
+  # get "page/index"
 
   post "/stream/notify_done", to: "watch#notify"
 
   get "/teacher", to: "page#teacher"
+
+  post "/teacher", to: "page#login"
 end
