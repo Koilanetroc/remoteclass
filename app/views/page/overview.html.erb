@@ -3,16 +3,15 @@
   <br>
   <div class="ui grid">
     <div class="ui four link cards">
-    <!-- <div class="ui modal">
+    <div class="ui modal">
       <div class="content">
-        <div class="actions" >
-          <div class="ui approve button">Approve</div>
-          <div class="ui button">Neutral</div>
+        <img src="" alt="" style="max-width: 50vw ; max-height: auto">
+        <div class="actions">
           <div class="ui cancel button">Cancel</div>
         </div>
       </div>
     </div>
-    </div> -->
+    </div>
   </div>
 </div>
 <script type="text/javascript">
@@ -35,10 +34,15 @@
       })
 
       if (!found_user && data["event"] == "new-image-data") {
-        var template = '<div class="card"><div class="image"><img src="' + data["image"] + '"></div><div class="content"><div class="header">' + data["name"] + '</div></div><div class="ui bottom attached button view"><i class="add icon"></i>Check</div></div>'
+        var template = '<div class="card view" data="' + data["name"] + '"><div class="image"><img src="' + data["image"] + '"></div><div class="content"><div class="header">' + data["name"] + '</div></div><div class="ui bottom attached button"><i class="add icon"></i>Check</div></div>'
         $('.ui.four.link.cards').append(template)
 
-        $('.view').click(function () {
+        $('.view').click(function() {
+          var name = $(this).attr('data')
+          var name_image = $(this).children('.image').children('img').attr('src')
+
+          $('.content img').attr("src", name_image);
+          $('.content img').attr("data", name);
 
           $('.ui.modal').modal('show');
         })
@@ -49,9 +53,11 @@
       // if we already know this pupil
       $('.header').each(function (index, el) {
         if (el.innerHTML.includes(data["name"])) {
-          console.log('updating ' + data["name"]);
-          var image = $('img')[index]
+          var image = $('.card img')[index]
           $(image).attr("src", data["image"]);
+          if ($('.content img').attr('data') == data["name"]) {
+            $('.content img').attr("src", data["image"]);
+          }
         }
       })
 
