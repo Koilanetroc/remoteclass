@@ -7,6 +7,16 @@ class PupilChannel < ApplicationCable::Channel
     stream_from "pupils_channel"
   end
 
+  def push_image_data(message)
+    puts "PID"
+    puts params["name"]
+
+    ActionCable.server.broadcast "pupils_channel", {
+      name: params["name"],
+      event: "new-image-data"
+    }.merge(message)
+  end
+
   def unsubscribed
     # Any cleanup needed when channel is unsubscribed
   end

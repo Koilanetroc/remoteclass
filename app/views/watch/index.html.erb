@@ -6,14 +6,22 @@
   <div class="ui text big loader">Ожидание подключения к трансляции...</div>
 </div>
 
-<div class="ui active inverted dimmer dimmer--not-transparent dimmer--hidden" id="dimmer-play">
+<div class="ui active inverted dimmer dimmer--not-transparent" id="dimmer-ws-connect">
+  <div class="ui text big loader">Соединение</div>
+</div>
+
+<a class="ui black icon button" id="leave-button" href="/">
+  <i class="close icon"></i>
+</a>
+
+<div class="ui active inverted dimmer dimmer--not-transparent display-none" id="dimmer-play">
   <h2>Трансляция подключена</h2>
   <a class="ui blue massive button" id="play-button">
     Смотреть
   </a>
 </div>
 
-<div class="ui active inverted dimmer dimmer--not-transparent dimmer--hidden" id="dimmer-error">
+<div class="ui active inverted dimmer dimmer--not-transparent display-none" id="dimmer-error">
   <h2>При просмотре возникла проблема</h2>
   <a class="ui blue massive button" href="?retry=1">
     Попробовать еще раз
@@ -21,6 +29,10 @@
   <a class="ui massive button" href="/">
     Вернуться назад
   </a>
+</div>
+
+<div id="drawing-board" class="display-none">
+  <canvas>Browser is too old for touch capabilities</canvas>
 </div>
 
 <video id="player" class="video-js video-player" controls autoplay preload="auto">
@@ -37,6 +49,139 @@
 </style>
 
 <script>
+  function debounce (callback, wait) {
+    let timeout;
+    return (...args) => {
+      const context = this;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => callback.apply(context, args), wait);
+    };
+  }
+
+  function initDrawing (onChange) {
+    var canvas = document.querySelector('#drawing-board > canvas')
+    var context = canvas.getContext('2d')
+
+    var debouncedOnChange = debounce(() => onChange(canvas), 1000)
+
+    var lineWidth = 0
+    var isMousedown = false
+    var points = []
+    canvas.width = window.innerWidth * 2
+    canvas.height = window.innerHeight * 2
+
+    console.log(context.fillStyle);
+
+    context.fillStyle = "white";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Send first white screen
+    debouncedOnChange()
+
+    // Force push each 10 seconds
+    setInterval(debouncedOnChange, 10000)
+
+    ;['touchstart', 'mousedown'].forEach(function (ev) {
+      canvas.addEventListener(ev, function (e) {
+        var pressure = 0.1
+        var x, y
+        if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
+          if (e.touches[0]["force"] > 0) {
+            pressure = e.touches[0]["force"]
+          }
+          x = e.touches[0].pageX * 2
+          y = e.touches[0].pageY * 2
+        } else {
+          pressure = 1.0
+          x = e.pageX * 2
+          y = e.pageY * 2
+        }
+        isMousedown = true
+        // lineWidth = (pressure * 50 * 0.8 + lineWidth * 0.2)
+        context.lineWidth = lineWidth// pressure * 50;
+        context.strokeStyle = 'black'
+        context.lineCap = 'round'
+        context.lineJoin = 'round'
+        context.beginPath()
+        context.moveTo(x, y)
+        points.push({
+          x, y, lineWidth
+        })
+      })
+    })
+    ;['touchmove', 'mousemove'].forEach(function (ev) {
+      canvas.addEventListener(ev, function (e) {
+        if (!isMousedown) return
+        var pressure = 0.1
+        var x, y
+        if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
+          if (e.touches[0]["force"] > 0) {
+            pressure = e.touches[0]["force"]
+          }
+          x = e.touches[0].pageX * 2
+          y = e.touches[0].pageY * 2
+        } else {
+          pressure = 1.0
+          x = e.pageX * 2
+          y = e.pageY * 2
+        }
+        lineWidth = (Math.log(pressure + 1) * 40 * 0.4 + lineWidth * 0.6)
+        points.push({
+          x, y, lineWidth
+        })
+        context.strokeStyle = 'black'
+        context.lineCap = 'round'
+        context.lineJoin = 'round'
+        // context.lineWidth   = lineWidth// pressure * 50;
+        // context.lineTo(x, y);
+        // context.moveTo(x, y);
+        if (points.length >= 3) {
+          var l = points.length - 1
+          var xc = (points[l].x + points[l - 1].x) / 2
+          var yc = (points[l].y + points[l - 1].y) / 2
+          context.lineWidth = points[l - 1].lineWidth
+          context.quadraticCurveTo(points[l - 1].x, points[l - 1].y, xc, yc)
+          context.stroke()
+          context.beginPath()
+          context.moveTo(xc, yc)
+        }
+        // $force.innerHTML = 'force = ' + pressure
+        // $touches.innerHTML = 'touchev = ' + (e.touches ? JSON.stringify(e.touches[0]) : '')
+        e.preventDefault()
+      })
+    })
+    ;['touchend', 'touchleave', 'mouseup'].forEach(function (ev) {
+      canvas.addEventListener(ev, function (e) {
+        var pressure = 0.1
+        var x, y
+        if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
+          if (e.touches[0]["force"] > 0) {
+            pressure = e.touches[0]["force"]
+          }
+          x = e.touches[0].pageX * 2
+          y = e.touches[0].pageY * 2
+        } else {
+          pressure = 1.0
+          x = e.pageX * 2
+          y = e.pageY * 2
+        }
+        isMousedown = false
+        context.strokeStyle = 'black'
+        context.lineCap = 'round'
+        context.lineJoin = 'round'
+        if (points.length >= 3) {
+          var l = points.length - 1
+          context.quadraticCurveTo(points[l].x, points[l].y, x, y)
+          context.stroke()
+        }
+        points = []
+        lineWidth = 0
+
+        debouncedOnChange()
+      })
+    })
+  }
+
   $(document).ready(function () {
     var streamLoaded = false;
     var played = false;
@@ -73,9 +218,9 @@
 
       streamLoaded = true;
 
-      document.querySelector("#dimmer-loading").classList.add("dimmer--hidden");
+      document.querySelector("#dimmer-loading").classList.add("display-none");
 
-      document.querySelector("#dimmer-play").classList.remove("dimmer--hidden");
+      document.querySelector("#dimmer-play").classList.remove("display-none");
     });
 
     player.on("ended", function () {
@@ -86,7 +231,7 @@
       if (this.error().code === 4) {
         setTimeout(function () {
           if (played) {
-            document.querySelector("#dimmer-error").classList.remove("dimmer--hidden");
+            document.querySelector("#dimmer-error").classList.remove("display-none");
 
             return
           }
@@ -111,7 +256,7 @@
     // });
 
     $("#play-button").click(function () {
-      document.querySelector("#dimmer-play").classList.add("dimmer--hidden");
+      document.querySelector("#dimmer-play").classList.add("display-none");
 
       player.play();
     })
@@ -150,7 +295,17 @@
         console.log(data);
       },
       connected: function () {
-        console.log("connected as a pupil")
+        console.log("connected as a pupil");
+
+        document.querySelector("#dimmer-ws-connect").classList.add("display-none");
+
+        initDrawing((canvas) => {
+          this.perform("push_image_data", {
+            width: canvas.width,
+            height: canvas.height,
+            image: canvas.toDataURL()
+          });
+        });
       },
       sendMessage: function(messageBody) {
 
