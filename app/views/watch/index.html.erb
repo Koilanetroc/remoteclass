@@ -14,6 +14,10 @@
   <i class="close icon"></i>
 </a>
 
+<a class="ui black icon button display-none" id="draw-button">
+  <i class="pencil icon"></i>
+</a>
+
 <div class="ui active inverted dimmer dimmer--not-transparent display-none" id="dimmer-play">
   <h2>Трансляция подключена</h2>
   <a class="ui blue massive button" id="play-button">
@@ -32,6 +36,29 @@
 </div>
 
 <div id="drawing-board" class="display-none">
+  <div id="draw-toolbar">
+    <button class="ui circular black large icon button" id="brush-plus">
+      <i class="icon plus"></i>
+    </button>
+    <button class="ui circular black large icon button" id="brush-minus">
+      <i class="icon minus"></i>
+    </button>
+    <button class="ui circular red large icon button" id="color-red">
+      <i class="icon paint brush"></i>
+    </button>
+    <button class="ui circular blue large icon button" id="color-blue">
+      <i class="icon paint brush"></i>
+    </button>
+    <button class="ui circular green large icon button" id="color-green">
+      <i class="icon paint brush"></i>
+    </button>
+    <button class="ui circular black large icon button" id="color-black">
+      <i class="icon paint brush"></i>
+    </button>
+    <button class="ui circular large icon button" id="color-white">
+      <i class="icon eraser"></i>
+    </button>
+  </div>
   <canvas>Browser is too old for touch capabilities</canvas>
 </div>
 
@@ -62,6 +89,40 @@
     var canvas = document.querySelector('#drawing-board > canvas')
     var context = canvas.getContext('2d')
 
+    var strokeColor = "#1b1c1d"
+
+    var brushCoeff = 1.0
+
+    $("#brush-plus").click(function () {
+      brushCoeff += 0.1
+    })
+
+    $("#brush-minus").click(function () {
+      brushCoeff -= 0.1
+
+      if (brushCoeff < 0.3) brushCoeff = 0.3
+    })
+
+    $("#color-red").click(function () {
+      strokeColor = "#db2828"
+    })
+
+    $("#color-blue").click(function () {
+      strokeColor = "#2185d0"
+    })
+
+    $("#color-green").click(function () {
+      strokeColor = "#21ba45"
+    })
+
+    $("#color-black").click(function () {
+      strokeColor = "#1b1c1d"
+    })
+
+    $("#color-white").click(function () {
+      strokeColor = "#ffffff"
+    })
+
     var debouncedOnChange = debounce(() => onChange(canvas), 1000)
 
     var lineWidth = 0
@@ -81,6 +142,10 @@
     // Force push each 10 seconds
     setInterval(debouncedOnChange, 10000)
 
+    var getStrokeColor = function () {
+      return strokeColor
+    }
+
     ;['touchstart', 'mousedown'].forEach(function (ev) {
       canvas.addEventListener(ev, function (e) {
         var pressure = 0.1
@@ -98,8 +163,8 @@
         }
         isMousedown = true
         // lineWidth = (pressure * 50 * 0.8 + lineWidth * 0.2)
-        context.lineWidth = lineWidth// pressure * 50;
-        context.strokeStyle = 'black'
+        context.lineWidth = lineWidth * brushCoeff// pressure * 50;
+        context.strokeStyle = getStrokeColor()
         context.lineCap = 'round'
         context.lineJoin = 'round'
         context.beginPath()
@@ -125,11 +190,11 @@
           x = e.pageX * 2
           y = e.pageY * 2
         }
-        lineWidth = (Math.log(pressure + 1) * 40 * 0.4 + lineWidth * 0.6)
+        lineWidth = (Math.log(pressure + 1) * 40 * 0.4 + lineWidth * 0.6) * brushCoeff
         points.push({
           x, y, lineWidth
         })
-        context.strokeStyle = 'black'
+        context.strokeStyle = getStrokeColor()
         context.lineCap = 'round'
         context.lineJoin = 'round'
         // context.lineWidth   = lineWidth// pressure * 50;
@@ -166,7 +231,7 @@
           y = e.pageY * 2
         }
         isMousedown = false
-        context.strokeStyle = 'black'
+        context.strokeStyle = getStrokeColor()
         context.lineCap = 'round'
         context.lineJoin = 'round'
         if (points.length >= 3) {
@@ -298,6 +363,12 @@
         console.log("connected as a pupil");
 
         document.querySelector("#dimmer-ws-connect").classList.add("display-none");
+
+        document.querySelector("#draw-button").classList.remove("display-none");
+
+        $("#draw-button").click(function () {
+          document.querySelector("#drawing-board").classList.toggle("display-none");
+        })
 
         initDrawing((canvas) => {
           this.perform("push_image_data", {
