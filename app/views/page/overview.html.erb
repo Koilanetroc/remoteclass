@@ -3,114 +3,15 @@
   <br>
   <div class="ui grid">
     <div class="ui four link cards">
-      <div class="card">
-        <div class="image">
-          <img src="/markup/images/3_4.gif">
-        </div>
-        <div class="content">
-          <div class="header">Matt Giampietro</div>
-        </div>
-        <div class="ui bottom attached button">
-          <i class="add icon"></i>
-          Check
+    <!-- <div class="ui modal">
+      <div class="content">
+        <div class="actions" >
+          <div class="ui approve button">Approve</div>
+          <div class="ui button">Neutral</div>
+          <div class="ui cancel button">Cancel</div>
         </div>
       </div>
-      <div class="card">
-        <div class="image">
-          <img src="/markup/images/16_9.png">
-        </div>
-        <div class="content">
-          <div class="header">Molly</div>
-        </div>
-        <div class="ui bottom attached button">
-          <i class="add icon"></i>
-          Check
-        </div>
-      </div>
-      <div class="card">
-        <div class="image">
-          <img src="/markup/images/4_3.png">
-        </div>
-        <div class="content">
-          <div class="header">Elyse</div>
-        </div>
-        <div class="ui bottom attached button">
-          <i class="add icon"></i>
-          Check
-        </div>
-      </div>
-      <div class="card">
-        <div class="image">
-          <img src="/markup/images/matthew.png">
-        </div>
-        <div class="content">
-          <div class="header">Elyse</div>
-        </div>
-        <div class="ui bottom attached button">
-          <i class="add icon"></i>
-          Check
-        </div>
-      </div>
-      <div class="card">
-        <div class="image">
-          <img src="/markup/images/matthew.png">
-        </div>
-        <div class="content">
-          <div class="header">Elyse</div>
-        </div>
-        <div class="ui bottom attached button">
-          <i class="add icon"></i>
-          Check
-        </div>
-      </div>
-      <div class="card">
-        <div class="image">
-          <img src="/markup/images/matthew.png">
-        </div>
-        <div class="content">
-          <div class="header">Elyse</div>
-        </div>
-        <div class="ui bottom attached button">
-          <i class="add icon"></i>
-          Check
-        </div>
-      </div>
-      <div class="card">
-        <div class="image">
-          <img src="/markup/images/3_4.gif">
-        </div>
-        <div class="content">
-          <div class="header">Matt Giampietro</div>
-        </div>
-        <div class="ui bottom attached button">
-          <i class="add icon"></i>
-          Check
-        </div>
-      </div>
-      <div class="card">
-        <div class="image">
-          <img src="/markup/images/matthew.png">
-        </div>
-        <div class="content">
-          <div class="header">Elyse</div>
-        </div>
-        <div class="ui bottom attached button">
-          <i class="add icon"></i>
-          Check
-        </div>
-      </div>
-      <div class="card">
-        <div class="image">
-          <img src="/markup/images/16_9.png">
-        </div>
-        <div class="content">
-          <div class="header">Molly</div>
-        </div>
-        <div class="ui bottom attached button">
-          <i class="add icon"></i>
-          Check
-        </div>
-      </div>
+    </div> -->
     </div>
   </div>
 </div>
@@ -122,8 +23,32 @@
   App.messaging = App.cable.subscriptions.create({channel: 'TeacherChannel'}, {
     received: function(data) {
       console.log(data);
+
+      //if we dont know pupil
+      var found_user = false;
+      data["name"] = decodeURIComponent(data["name"]).replace('+', ' ')
       $('.header').each(function (index, el) {
         if (el.innerHTML.includes(data["name"])) {
+          found_user = true
+        }
+      })
+
+      if (!found_user) {
+        var template = '<div class="card"><div class="image"><img src="' + data["image"] + '"></div><div class="content"><div class="header">' + data["name"] + '</div></div><div class="ui bottom attached button view"><i class="add icon"></i>Check</div></div>'
+        $('.ui.four.link.cards').append(template)
+
+        $('.view').click(function () {
+
+          $('.ui.modal').modal('show');
+        })
+      }
+
+      console.log('FOUND USER = ' + found_user);
+
+      // if we already know this pupil
+      $('.header').each(function (index, el) {
+        if (el.innerHTML.includes(data["name"])) {
+          console.log('updating ' + data["name"]);
           var image = $('img')[index]
           $(image).attr("src", data["image"]);
         }
@@ -134,13 +59,4 @@
       console.log("connected to teachers channel");
     }
   })
-
-  var pupils = {}
-  
-
-  // $('i').click(function () {
-  //   $('.ui.modal')
-  //     .modal('show')
-  //   ;
-  // })
 </script>
