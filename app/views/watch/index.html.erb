@@ -2,6 +2,27 @@
 <link rel="stylesheet" href="/css/view.css">
 <script src="/videojs/video.js"></script>
 
+<div class="ui active inverted dimmer dimmer--not-transparent" id="dimmer-loading">
+  <div class="ui text big loader">Ожидание подключения к трансляции...</div>
+</div>
+
+<div class="ui active inverted dimmer dimmer--not-transparent dimmer--hidden" id="dimmer-play">
+  <h2>Трансляция подключена</h2>
+  <a class="ui blue massive button" id="play-button">
+    Смотреть
+  </a>
+</div>
+
+<div class="ui active inverted dimmer dimmer--not-transparent dimmer--hidden" id="dimmer-error">
+  <h2>При просмотре возникла проблема</h2>
+  <a class="ui blue massive button" href="?retry=1">
+    Попробовать еще раз
+  </a>
+  <a class="ui massive button" href="/">
+    Вернуться назад
+  </a>
+</div>
+
 <video id="player" class="video-js video-player" controls autoplay preload="auto">
   <p class="vjs-no-js">
     To view this video please enable JavaScript, and consider upgrading to a web browser that
@@ -16,46 +37,83 @@
 </style>
 
 <script>
-  var player = videojs('player');
+  $(document).ready(function () {
+    var streamLoaded = false;
+    var played = false;
+    var player = videojs('player');
 
-  var setSrc = function () {
-    let stream = "http://" + location.hostname + ":8085/hls/live.m3u8?cache=" + Math.random();
+    var setSrc = function () {
+      let stream = "http://" + location.hostname + ":8085/hls/live.m3u8?cache=" + Math.random();
 
-    player.src({
-      src: stream,
-      type: 'application/x-mpegURL',
-      overrideNative: true
+      player.src({
+        src: stream,
+        type: 'application/x-mpegURL',
+        overrideNative: true
+      });
+
+      player.load();
+    }
+
+    setInterval(function () {
+      console.log("rs", player.readyState())
+    }, 1000)
+
+    setSrc()
+
+    player.reloadSourceOnError()
+
+    player.on("playing", function () {
+      player.liveTracker.seekToLiveEdge();
+
+      played = true;
     });
 
-    player.load();
-  }
+    player.on("durationchange", function () {
+      console.log("Can play!")
 
-  setInterval(function () {
-    console.log("rs", player.readyState())
-  }, 1000)
+      streamLoaded = true;
 
-  setSrc()
+      document.querySelector("#dimmer-loading").classList.add("dimmer--hidden");
 
-  player.reloadSourceOnError()
+      document.querySelector("#dimmer-play").classList.remove("dimmer--hidden");
+    });
 
-  player.on("playing", function () {
-    player.liveTracker.seekToLiveEdge();
-  });
+    player.on("ended", function () {
+      console.log("Ended!")
+    });
 
-  player.on("durationchange", function () {
-    console.log("Can play!")
-  });
+    player.on("error", function (e) {
+      if (this.error().code === 4) {
+        setTimeout(function () {
+          if (played) {
+            document.querySelector("#dimmer-error").classList.remove("dimmer--hidden");
 
-  player.on("ended", function () {
-    console.log("Ended!")
-  });
+            return
+          }
 
-  player.on("error", function (e) {
-    if (this.error().code === 4) {
-      setTimeout(function () {
-        console.log("Retrying")
-        setSrc()
-      }, 5000)
-    }
-  });
+          console.log("Retrying")
+          setSrc()
+        }, 2000)
+      }
+    });
+
+    // player.tech().hls.on('hls-unknown-waiting', function() {
+    //   console.log('hls-unknown-waiting');
+    // });
+    // player.tech().hls.on('hls-live-resync', function() {
+    //   console.log('hls-live-resync');
+    // });
+    // player.on('hls-error-reload-initialized', function() {
+    //   console.log('hls-error-reload-initialized');
+    // });
+    // player.on('hls-error-reload', function() {
+    //   console.log('hls-error-reload');
+    // });
+
+    $("#play-button").click(function () {
+      document.querySelector("#dimmer-play").classList.add("dimmer--hidden");
+
+      player.play();
+    })
+  })
 </script>
