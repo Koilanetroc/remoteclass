@@ -11,7 +11,7 @@ class PupilChannel < ApplicationCable::Channel
     puts "PID"
     puts params["name"]
 
-    ActionCable.server.broadcast "pupils_channel", {
+    ActionCable.server.broadcast "teachers_channel", {
       name: params["name"],
       event: "new-image-data"
     }.merge(message)

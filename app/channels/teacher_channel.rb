@@ -2,7 +2,7 @@
 
 class TeacherChannel < ApplicationCable::Channel
   def subscribed
-    reject && (return) unless params["name"] == ENV["TEACHER_NAME"]
+    # reject && (return) unless params["name"] == ENV["TEACHER_NAME"]
     stream_from "teachers_channel"
   end
 
