@@ -1,14 +1,16 @@
 # frozen_string_literal: true
 
 class WatchController < ApplicationController
+  skip_before_action :verify_authenticity_token, only: :notify
+
   def index
   end
 
   def notify
     ActionCable.server.broadcast "teachers_channel",
-      message: "triggered event"
+      event: "broadcast-end"
     ActionCable.server.broadcast "pupils_channel",
-      message: "triggered event"
+      event: "broadcast-end"
     render plain: "Ok"
   end
 end
