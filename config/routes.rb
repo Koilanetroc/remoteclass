@@ -7,7 +7,7 @@ Rails.application.routes.draw do
 
   get "page/index"
 
-  get "stream/notify_done", to: "watch#notify"
+  post "/stream/notify_done", to: "watch#notify"
 
   get "/teacher", to: "page#teacher"
 end

@@ -25,6 +25,13 @@
   </a>
 </div>
 
+<div class="ui active inverted dimmer dimmer--not-transparent display-none" id="dimmer-ended">
+  <h2>Трансляция окончена</h2>
+  <a class="ui blue massive button" href="/">
+    Вернуться назад
+  </a>
+</div>
+
 <div class="ui active inverted dimmer dimmer--not-transparent display-none" id="dimmer-error">
   <h2>При просмотре возникла проблема</h2>
   <a class="ui blue massive button" href="?retry=1">
@@ -123,7 +130,7 @@
       strokeColor = "#ffffff"
     })
 
-    var debouncedOnChange = debounce(() => onChange(canvas), 1000)
+    var debouncedOnChange = debounce(() => onChange(canvas), 500)
 
     var lineWidth = 0
     var isMousedown = false
@@ -331,7 +338,7 @@
         setTimeout(function () {
           console.log("Retrying")
           setSrc()
-        }, 5000)
+        }, 3500)
       }
     });
 
@@ -357,7 +364,11 @@
     // trying to connect as a pupil
     App.messaging = App.cable.subscriptions.create({channel: 'PupilChannel', name: user_name}, {
       received: function(data) {
-        console.log(data);
+        if (data.event === "broadcast-end") {
+          setTimeout(function () {
+            document.querySelector("#dimmer-ended").classList.remove("display-none");
+          }, 10000)
+        }
       },
       connected: function () {
         console.log("connected as a pupil");
