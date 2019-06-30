@@ -253,7 +253,7 @@
           context.stroke()
         }
         points = []
-        lineWidth = 0
+        lineWidth = 1
 
         debouncedOnChange()
       })
@@ -286,13 +286,17 @@
     player.reloadSourceOnError()
 
     player.on("playing", function () {
-      player.liveTracker.seekToLiveEdge();
+      setTimeout(function () {
+        player.liveTracker.seekToLiveEdge();
+      }, 2000)
 
       played = true;
     });
 
     player.on("durationchange", function () {
       console.log("Can play!")
+
+      if (streamLoaded) return
 
       streamLoaded = true;
 
