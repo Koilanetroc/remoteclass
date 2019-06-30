@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class PageController < ApplicationController
-  skip_before_filter :verify_authenticity_token
+  skip_before_action :verify_authenticity_token
 
   def index
   end
@@ -11,6 +11,8 @@ class PageController < ApplicationController
     #   redirect_to root_path
     # end
     # render "overview"
+
+    render "overview"
   end
 
   def teacher
