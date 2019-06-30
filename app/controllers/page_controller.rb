@@ -7,12 +7,11 @@ class PageController < ApplicationController
   end
 
   def login
-    # if params[:password] != ENV["TEACHER_PASSWORD"]
-    #   redirect_to root_path
-    # end
-    # render "overview"
-
-    render "overview"
+    if params[:password] != ENV["TEACHER_PASSWORD"]
+      redirect_to teacher_path
+    else
+      render "overview"
+    end
   end
 
   def teacher
