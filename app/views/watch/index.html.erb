@@ -92,7 +92,13 @@
     };
   }
 
+  var drawInitialized = false
+
   function initDrawing (onChange) {
+    if (drawInitialized) return
+
+    drawInitialized = true
+
     var canvas = document.querySelector('#drawing-board > canvas')
     var context = canvas.getContext('2d')
 
