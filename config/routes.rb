@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   root to: "index#index"
 
   get "page/index"
+
   get "stream/notify_done", to: "watch#notify"
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+
+  get "/teacher", to: "page#teacher"
 end
